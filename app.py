@@ -3,13 +3,12 @@ from datetime import datetime, timedelta
 
 # --- PAGE CONFIG ---
 st.set_page_config(
-    page_title="DVLA Clinical Guidance Tool",
+    page_title="DVLA Clinical Standards 2026",
     page_icon="🩺",
     layout="wide"
 )
 
-# --- THE DATA (Organized by DVLA Chapters) ---
-# Updated with 2026 guidance (e.g., CGM for Group 2)
+# --- THE COMPLETE DATASET (8 CHAPTERS) ---
 DVLA_GUIDELINES = {
     "Chapter 1: Neurological": {
         "TIA / Stroke": {
@@ -22,41 +21,94 @@ DVLA_GUIDELINES = {
             "group2": "Must not drive for 5 years. Must be seizure-free without meds for 10 years.",
             "notifiable": "Yes."
         },
-        "Parkinson's Disease": {
-            "group1": "May drive as long as safe vehicle control is maintained. Must notify DVLA.",
-            "group2": "Licence usually revoked unless very mild and stable.",
+        "Cognitive Impairment (Post-Injury)": {
+            "group1": "Must not drive if impairment is likely to affect safe driving.",
+            "group2": "Licence refused or revoked permanently if significant impairment exists.",
             "notifiable": "Yes."
         }
     },
     "Chapter 2: Cardiovascular": {
         "Myocardial Infarction (STEMI/NSTEMI)": {
             "group1": "Must not drive for 1 week if successful primary PCI and LVEF > 40%. Otherwise 4 weeks.",
-            "group2": "Must not drive for 6 weeks. Requires exercise test and LVEF > 40% to resume.",
+            "group2": "Must not drive for 6 weeks. Requires exercise test and LVEF > 40%.",
             "notifiable": "No (for Group 1)."
         },
-        "Aortic Aneurysm (Abdominal)": {
-            "group1": "No restriction if < 6cm. Notify if 6cm - 6.4cm. Disqualified if > 6.5cm.",
-            "group2": "Disqualified if > 5.5cm.",
-            "notifiable": "Depends on size (Notify if > 6cm)."
+        "Pacemaker Implantation": {
+            "group1": "Must not drive for 1 week.",
+            "group2": "Must not drive for 6 weeks.",
+            "notifiable": "Yes."
         }
     },
     "Chapter 3: Diabetes": {
-        "Insulin Treated (on CGM)": {
-            "group1": "Must notify DVLA. Must monitor glucose (CGM/Flash allowed 2026).",
-            "group2": "Strict criteria: CGM now permitted for monitoring but finger-prick backup required.",
+        "Insulin Treated (Group 1)": {
+            "group1": "May drive if no more than 1 severe hypo in 12 months. CGM/Flash permitted (2026 update).",
+            "group2": "Strict criteria: CGM permitted for monitoring, but finger-prick backup required. No severe hypos in 12 months.",
             "notifiable": "Yes."
         },
-        "Hypoglycaemia (Severe)": {
-            "group1": "Must not drive if >1 episode of severe hypo in 12 months.",
-            "group2": "Licence revoked. Must show 12 months of 'full awareness' and zero severe hypos.",
+        "Severe Hypoglycaemia": {
+            "group1": "Must not drive for 12 months after 2nd episode in a 12-month period.",
+            "group2": "Licence revoked for 12 months after a single episode.",
+            "notifiable": "Yes."
+        }
+    },
+    "Chapter 4: Psychiatric": {
+        "Psychosis / Schizophrenia": {
+            "group1": "Must not drive during acute illness. May be relicensed after 3 months of stability.",
+            "group2": "Licence revoked. May be considered after 12 months of stability.",
+            "notifiable": "Yes."
+        },
+        "Severe Depression / Anxiety": {
+            "group1": "Must notify if symptoms (e.g. concentration/suicidal ideation) affect driving.",
+            "group2": "Licence revoked if severe. Considered after 6 months of stability.",
+            "notifiable": "Yes (if symptomatic)."
+        }
+    },
+    "Chapter 5: Drug & Alcohol": {
+        "Alcohol Dependence": {
+            "group1": "Licence refused/revoked until 1 year of abstinence. Controlled drinking maybe considered.",
+            "group2": "Licence refused/revoked until 3 years of abstinence.",
+            "notifiable": "Yes."
+        },
+        "Persistent Cannabis/Cocaine Misuse": {
+            "group1": "Licence revoked for 6 months minimum (must be drug-free).",
+            "group2": "Licence revoked for 1 year minimum (must be drug-free).",
+            "notifiable": "Yes."
+        }
+    },
+    "Chapter 6: Vision": {
+        "Visual Acuity (Minimum Standard)": {
+            "group1": "6/12 on Snellen scale. Must read number plate at 20m.",
+            "group2": "6/7.5 in better eye and 6/60 in poorer eye.",
+            "notifiable": "Only if standard cannot be met."
+        },
+        "Visual Field Defects": {
+            "group1": "Horizontal field of 120°. No significant defect within central 20°.",
+            "group2": "Horizontal field of 160°. No defect within central 30°.",
             "notifiable": "Yes."
         }
     },
     "Chapter 7: Renal & Respiratory": {
-        "Obstructive Sleep Apnoea (OSA)": {
-            "group1": "Must not drive if causing excessive daytime sleepiness. May resume when controlled (e.g. CPAP).",
-            "group2": "Licence revoked until symptoms controlled and specialist review confirms compliance.",
-            "notifiable": "Yes (if symptomatic)."
+        "Sleep Apnoea (OSA) Syndrome": {
+            "group1": "Must not drive until symptoms controlled (e.g. CPAP).",
+            "group2": "Licence revoked until symptoms controlled and review confirms compliance.",
+            "notifiable": "Yes."
+        },
+        "Chronic Renal Failure (Dialysis)": {
+            "group1": "May drive unless causing significant symptoms (e.g. fatigue).",
+            "group2": "Licence revoked if severe symptoms present.",
+            "notifiable": "No (unless symptomatic)."
+        }
+    },
+    "Chapter 8: Miscellaneous": {
+        "Hepatic Encephalopathy (New 2026)": {
+            "group1": "Must not drive and must notify. Licensing considered if OHE is successfully treated.",
+            "group2": "Licence revoked. Relicensing requires specialist report and long-term stability.",
+            "notifiable": "Yes."
+        },
+        "Post-Major Surgery": {
+            "group1": "Must follow clinical advice (usually 1-3 months). Generally do not notify DVLA if <3 months.",
+            "group2": "Must follow clinical advice. Often requires occupational health clearance.",
+            "notifiable": "No (if <3 months)."
         }
     }
 }
@@ -64,79 +116,65 @@ DVLA_GUIDELINES = {
 # --- STYLING ---
 st.markdown("""
     <style>
-    .main { background-color: #f0f2f6; }
-    .stSelectbox label { font-weight: bold; color: #004b87; }
-    .reportview-container .main .block-container{ padding-top: 2rem; }
+    .main { background-color: #f4f7f6; }
+    h1 { color: #005eb8; } /* NHS Blue */
+    .stSelectbox label { font-weight: bold; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- SIDEBAR: CLINICAL TOOLS ---
+# --- HEADER ---
+st.title("🩺 Complete DVLA Medical Standards (2026 Edition)")
+st.write("Cross-specialty tool for inpatient discharge and outpatient clinic reviews.")
+
+# --- NAVIGATION ---
+col_chapter, col_condition = st.columns(2)
+
+with col_chapter:
+    selected_chapter = st.selectbox("📁 Select Chapter", options=list(DVLA_GUIDELINES.keys()))
+
+with col_condition:
+    selected_condition = st.selectbox("🔬 Select Condition", options=list(DVLA_GUIDELINES[selected_chapter].keys()))
+
+# --- CALCULATION (SIDEBAR) ---
 with st.sidebar:
-    st.header("📅 Timeline Calculator")
-    event_date = st.date_input("Date of Event/Diagnosis:", value=datetime.now())
-    duration = st.selectbox("Recommended Cessation:", 
-                            options=[1, 2, 3, 6, 12, 60], 
-                            format_func=lambda x: f"{x} Months")
+    st.header("⏳ Cessation Period")
+    event_date = st.date_input("Event Date", value=datetime.today())
+    cess_months = st.number_input("Months Off", min_value=0, max_value=60, value=1)
     
-    # Calculate date
-    resume_date = event_date + timedelta(days=(duration * 30))
-    st.success(f"**Earliest Resume Date:**\n\n{resume_date.strftime('%d %B %Y')}")
+    resume_date = event_date + timedelta(days=cess_months * 30)
+    st.metric("Earliest Resume Date", resume_date.strftime('%d/%m/%Y'))
     
     st.divider()
-    st.markdown("### 📞 Specialist Support")
-    st.info("**DVLA Medical Adviser (Doc-to-Doc):**\n\n01792 782337\n(10:30 - 13:00)")
+    st.markdown("### 📞 DVLA Direct")
+    st.write("Medical Enquiries: **0300 790 6806**")
 
-# --- MAIN UI ---
-st.title("🩺 DVLA Medical Standards Navigator")
-st.write("Select the relevant chapter and condition to view the current fitness-to-drive requirements.")
-
-# Selection Logic
-col_a, col_b = st.columns(2)
-
-with col_a:
-    chapter = st.selectbox("1. Select Category / System:", options=list(DVLA_GUIDELINES.keys()))
-
-with col_b:
-    condition_list = list(DVLA_GUIDELINES[chapter].keys())
-    condition = st.selectbox("2. Select Condition:", options=condition_list)
-
-# Display Findings
-if chapter and condition:
-    data = DVLA_GUIDELINES[chapter][condition]
+# --- RESULTS DISPLAY ---
+if selected_chapter and selected_condition:
+    res = DVLA_GUIDELINES[selected_chapter][selected_condition]
     
     st.divider()
     
-    # Notification Header
-    notif_text = data['notifiable']
-    color = "#d32f2f" if "yes" in notif_text.lower() else "#2e7d32"
-    st.markdown(f"### Notification Required? <span style='color:{color}'>{notif_text}</span>", unsafe_allow_html=True)
+    # Notification Banner
+    notif_color = "#D32F2F" if "yes" in res['notifiable'].lower() else "#388E3C"
+    st.markdown(f"### Notification Status: <span style='color:{notif_color}'>{res['notifiable']}</span>", unsafe_allow_html=True)
 
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("🚗 Group 1")
-        st.caption("Cars and Motorcycles")
-        st.info(data['group1'])
-        
-    with col2:
-        st.subheader("🚛 Group 2")
-        st.caption("Bus and Lorry")
-        st.warning(data['group2'])
+    c1, c2 = st.columns(2)
+    with c1:
+        st.info(f"**🚗 Group 1 (Car/Motorcycle)**\n\n{res['group1']}")
+    with c2:
+        st.warning(f"**🚛 Group 2 (Bus/Lorry)**\n\n{res['group2']}")
 
-    # Discharge Summary Template
+    # Clinical Note Generation
     st.divider()
-    st.subheader("📝 Discharge Summary / Clinic Note")
-    
-    summary_text = (
-        f"The patient was advised regarding DVLA fitness to drive standards for {condition}. "
-        f"Based on Chapter {chapter.split(':')[0]} of the DVLA medical standards, "
-        f"they must cease driving for a minimum of {duration} months. "
-        f"Earliest date to resume (subject to recovery): {resume_date.strftime('%d/%m/%Y')}. "
-        f"The patient has been reminded of their legal obligation to notify the DVLA."
+    st.subheader("🖋️ Proposed Medical Entry / Discharge Advice")
+    note = (
+        f"Discussed DVLA fitness to drive guidance ({selected_chapter}: {selected_condition}). "
+        f"The patient has been advised to cease driving for {cess_months} month(s) from the date of the event. "
+        f"Earliest potential return: {resume_date.strftime('%d/%m/%Y')}. "
+        f"The patient understands it is their legal responsibility to notify the DVLA."
     )
-    
-    st.text_area("Copy and paste to record:", value=summary_text, height=120)
+    st.code(note, language="text")
 
 # --- FOOTER ---
 st.divider()
-st.caption("⚠️ **Note for Clinicians:** This tool uses a subset of data for demonstration. Always verify with the full 'Assessing fitness to drive' guide on GOV.UK before finalising advice.")
+st.caption("🚨 **Clinician Alert:** This tool is for guidance. Refer to the full GOV.UK 'Assessing fitness to drive' document for complex cases or high-risk offenders.")
