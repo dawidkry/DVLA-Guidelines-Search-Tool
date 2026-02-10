@@ -4,64 +4,37 @@ from datetime import datetime, timedelta, date
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="DVLA Clinical Standards 2026", page_icon="🩺", layout="wide")
 
-# --- THE ACCESSIBILITY ENGINE (FORCED CONTRAST) ---
+# --- STYLING (RESTORED TO YOUR PREFERRED THEME) ---
 st.markdown("""
     <style>
-    /* 1. MAIN BODY: PURE WHITE BACKGROUND, BLACK TEXT */
-    .stApp {
-        background-color: #FFFFFF !important;
-        color: #000000 !important;
+    /* 1. Force Sidebar Background and Text Visibility */
+    [data-testid="stSidebar"] {
+        background-color: #f0f2f6 !important;
+    }
+    [data-testid="stSidebar"] * {
+        color: #000000 !important; /* Forces all text in sidebar to Black */
     }
     
-    /* 2. SIDEBAR: PURE BLACK BACKGROUND, WHITE TEXT */
-    [data-testid="stSidebar"] {
-        background-color: #000000 !important;
-        border-right: 2px solid #005eb8;
-    }
-    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p, 
-    [data-testid="stSidebar"] label, 
-    [data-testid="stSidebar"] h1, 
-    [data-testid="stSidebar"] h2 {
-        color: #FFFFFF !important;
-        font-weight: bold !important;
-    }
-
-    /* 3. INPUT BOXES IN SIDEBAR: WHITE BG, BLACK TEXT */
-    [data-testid="stSidebar"] input, [data-testid="stSidebar"] select {
-        background-color: #FFFFFF !important;
-        color: #000000 !important;
-    }
-
-    /* 4. METRIC (RESUME DATE): WHITE TEXT ON BLACK */
+    /* 2. Fix Metric Value specifically (The Resume Date) */
     [data-testid="stMetricValue"] {
-        color: #FFFFFF !important;
-        background-color: #000000 !important;
-        font-weight: bold !important;
-        font-size: 2rem !important;
-    }
-    [data-testid="stMetricLabel"] {
-        color: #AAAAAA !important;
-    }
-
-    /* 5. MAIN TEXT CONTENT */
-    h1, h2, h3, p, span {
         color: #000000 !important;
+        font-weight: bold !important;
+        font-size: 1.8rem !important;
     }
 
-    /* 6. THE REFERENCE BOX: WHITE BG, BLACK TEXT, BLUE BORDER */
+    /* 3. Reference Box Styling */
     .ref-box {
-        background-color: #FFFFFF;
-        color: #000000;
+        background-color: #ffffff;
+        color: #1a1a1a;
         padding: 20px;
-        border: 3px solid #005eb8;
+        border: 2px solid #005eb8;
         border-radius: 8px;
-        font-size: 1.1em;
-        font-weight: 500;
+        font-size: 1.05em;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- FULL DATASET ---
+# --- THE EXPANDED DATABASE ---
 DVLA_DATA = {
     "Chapter 1: Neurological": {
         "url": "https://www.gov.uk/guidance/neurological-disorders-assessing-fitness-to-drive",
@@ -74,7 +47,7 @@ DVLA_DATA = {
             "Brain Tumour (Malignant)": {"g1": "1-2 years off.", "g2": "Permanent bar.", "notif": "Yes", "ref": "Grade 1/2: 1 year off. Grade 3/4: 2 years off from completion of primary treatment."},
             "Multiple Sclerosis / MND": {"g1": "Pass test.", "g2": "Revoked.", "notif": "Yes", "ref": "Must notify. Driving may continue if no sudden disabling symptoms or significant cognitive impairment."},
             "Dementia": {"g1": "Cognition dependent.", "g2": "Revoked.", "notif": "Yes", "ref": "Licence may be granted subject to annual medical review and/or on-road driving assessment."},
-            "Parkinson's Disease": {"g1": "Pass test.", "g2": "Revoked.", "notif": "Yes", "ref": "Must notify. Licensing depends on maintaining safe control and absence of significant motor/cognitive fluctuations."}
+            "Parkinson's Disease": {"g1": "Pass test.", "g2": "Revoked.", "notif": "Yes", "ref": "Licence depends on maintaining safe control and absence of significant motor/cognitive fluctuations."}
         }
     },
     "Chapter 2: Cardiovascular": {
@@ -85,7 +58,6 @@ DVLA_DATA = {
             "Pacemaker Insertion": {"g1": "1 week off.", "g2": "6 weeks off.", "notif": "Yes", "ref": "Must not drive for 1 week (G1) or 6 weeks (G2) following implantation or battery change."},
             "ICD (Prophylactic)": {"g1": "1 month off.", "g2": "Permanent bar.", "notif": "Yes", "ref": "Group 1: 1 month off if asymptomatic. Group 2: Permanent bar for any ICD implantation."},
             "ICD (Symptomatic/Sustained VT)": {"g1": "6 months off.", "g2": "Permanent bar.", "notif": "Yes", "ref": "Group 1: 6 months off from the date of the event or last shock."},
-            "Heart Failure (NYHA IV)": {"g1": "Must not drive.", "g2": "Must not drive.", "notif": "Yes", "ref": "Driving is prohibited if symptoms occur at rest or minimal exertion."},
             "Aortic Aneurysm": {"g1": ">6.5cm Stop.", "g2": ">5.5cm Stop.", "notif": "Yes", "ref": "Group 1: Notify if >6cm. Disqualified if >6.5cm. Group 2: Disqualified if >5.5cm."},
             "Valvular Heart Disease": {"g1": "Stop until stable.", "g2": "Revoked.", "notif": "Yes", "ref": "Must notify and stop driving if symptoms (e.g. syncope, dyspnoea) are present."}
         }
@@ -140,19 +112,18 @@ DVLA_DATA = {
 
 # --- NAVIGATION ---
 st.title("🩺 DVLA Clinical Standards Navigator")
-
-col_top1, col_top2 = st.columns(2)
-with col_top1:
+c_col1, c_col2 = st.columns(2)
+with c_col1:
     chap = st.selectbox("📁 System Chapter", options=list(DVLA_DATA.keys()))
-with col_top2:
+with c_col2:
     cond = st.selectbox("🔬 Clinical Condition", options=list(DVLA_DATA[chap]["conditions"].keys()))
 
 st.link_button(f"🔗 Source: {chap} (GOV.UK)", DVLA_DATA[chap]["url"])
 
-# --- DATA ---
+# --- DATA RETRIEVAL ---
 res = DVLA_DATA[chap]["conditions"][cond]
 
-# --- SIDEBAR (FORCED BLACK BG / WHITE TEXT) ---
+# --- SIDEBAR CALCULATOR ---
 with st.sidebar:
     st.header("⏳ Cessation Clock")
     evt_date = st.date_input("Date of Event:", value=date.today())
@@ -161,7 +132,6 @@ with st.sidebar:
     
     delta = timedelta(weeks=num) if unit == "Weeks" else timedelta(days=int(num * 30.44))
     resume = evt_date + delta
-    
     st.metric("Resume Date", resume.strftime('%d/%m/%Y'))
 
 # --- MAIN CLINICAL VERDICT ---
@@ -169,16 +139,16 @@ st.divider()
 col_notif, col_g1, col_g2 = st.columns([1, 1.5, 1.5])
 
 with col_notif:
-    notif_label = "**🔔 Notifiable?**"
-    st.markdown(f"{notif_label}\n\n<span style='color:#005eb8; font-size: 1.5em; font-weight: bold;'>{res['notif']}</span>", unsafe_allow_html=True)
+    notif_color = "#d32f2f" if "yes" in res['notif'].lower() else "#2e7d32"
+    st.markdown(f"**🔔 Notifiable?**\n\n<span style='color:{notif_color}; font-size: 1.25em; font-weight: bold;'>{res['notif']}</span>", unsafe_allow_html=True)
 
 with col_g1:
-    st.markdown(f"**🚗 Group 1 (Car/Bike)**\n\n{res['g1']}")
+    st.info(f"**🚗 Group 1 (Car/Bike)**\n\n{res['g1']}")
 
 with col_g2:
-    st.markdown(f"**🚛 Group 2 (HGV/Bus)**\n\n{res['g2']}")
+    st.warning(f"**🚛 Group 2 (HGV/Bus)**\n\n{res['g2']}")
 
-# --- OFFICIAL REFERENCE (FORCED BLACK ON WHITE) ---
+# --- OFFICIAL REFERENCE ---
 st.divider()
 st.subheader("📖 Official Regulatory Reference")
 st.markdown(f'<div class="ref-box">{res["ref"]}</div>', unsafe_allow_html=True)
