@@ -2,7 +2,7 @@ import streamlit as st
 from datetime import datetime, timedelta, date
 
 # --- PAGE CONFIG ---
-st.set_page_config(page_title="DVLA Clinical Standards 2026", page_icon="🩺", layout="wide")
+st.set_page_config(page_title="DVLA Clinical Standards", page_icon="🩺", layout="wide")
 
 # --- UI STYLING ---
 st.markdown("""
