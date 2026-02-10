@@ -8,8 +8,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- THE COMPLETE DATASET (8 CHAPTERS + URLS) ---
-# We keep the URLs at the chapter level so they are easy to access
+# --- THE DATASET (8 CHAPTERS + URLS) ---
 CHAPTER_LINKS = {
     "Chapter 1: Neurological": "https://www.gov.uk/guidance/neurological-disorders-assessing-fitness-to-drive",
     "Chapter 2: Cardiovascular": "https://www.gov.uk/guidance/cardiovascular-disorders-assessing-fitness-to-drive",
@@ -23,19 +22,24 @@ CHAPTER_LINKS = {
 
 DVLA_GUIDELINES = {
     "Chapter 1: Neurological": {
-        "TIA / Stroke": {
-            "group1": "Must not drive for 1 month. May resume after 1 month if no residual deficit.",
-            "group2": "Licence revoked for 1 year. Relicensing after 1 year if stable.",
-            "notifiable": "No (unless residual deficit after 1 month)."
+        "Syncope (Simple Faint)": {
+            "group1": "No restriction if there is an identifiable prodrome and no recurrence.",
+            "group2": "No restriction unless recurring or no prodrome. Must not drive if occurred while sitting/standing.",
+            "notifiable": "No."
         },
-        "Epilepsy (First Seizure)": {
-            "group1": "Must not drive for 6 or 12 months (specialist dependent).",
-            "group2": "Must not drive for 5 years. Seizure-free without meds for 10 years.",
+        "Syncope (Unexplained TLoC)": {
+            "group1": "6 months off if low risk; 12 months if high risk. Specialist review usually required.",
+            "group2": "Licence revoked for 12 months. Relicensing depends on cause.",
             "notifiable": "Yes."
         },
-        "Cognitive Impairment": {
-            "group1": "Must not drive if impairment affects safe driving.",
-            "group2": "Licence revoked permanently if significant impairment exists.",
+        "TIA / Stroke": {
+            "group1": "Must not drive for 1 month. May resume if no residual deficit.",
+            "group2": "Licence revoked for 1 year. Relicensing after 1 year if stable.",
+            "notifiable": "No (unless residual deficit)."
+        },
+        "Epilepsy (First Seizure)": {
+            "group1": "Must not drive for 6 or 12 months.",
+            "group2": "Must not drive for 5 years.",
             "notifiable": "Yes."
         }
     },
@@ -45,9 +49,9 @@ DVLA_GUIDELINES = {
             "group2": "6 weeks off. Requires exercise test and LVEF > 40%.",
             "notifiable": "No (for Group 1)."
         },
-        "Pacemaker Implantation": {
-            "group1": "Must not drive for 1 week.",
-            "group2": "Must not drive for 6 weeks.",
+        "Arrhythmia (Symptomatic)": {
+            "group1": "Must stop driving if arrhythmia has caused or is likely to cause incapacity.",
+            "group2": "Licence revoked until arrhythmia controlled for 3 months.",
             "notifiable": "Yes."
         }
     },
@@ -56,11 +60,6 @@ DVLA_GUIDELINES = {
             "group1": "May drive if <1 severe hypo in 12 months. CGM/Flash permitted.",
             "group2": "Strict criteria: CGM allowed but must carry finger-prick backup.",
             "notifiable": "Yes."
-        },
-        "Severe Hypoglycaemia": {
-            "group1": "Stop driving for 12 months after 2nd episode in 12 months.",
-            "group2": "Licence revoked for 12 months after a single episode.",
-            "notifiable": "Yes."
         }
     },
     "Chapter 4: Psychiatric": {
@@ -68,22 +67,12 @@ DVLA_GUIDELINES = {
             "group1": "No driving during acute illness. Stable for 3 months to resume.",
             "group2": "Licence revoked. Considered after 12 months of stability.",
             "notifiable": "Yes."
-        },
-        "Severe Depression / Anxiety": {
-            "group1": "Notify if symptoms affect concentration or safe driving.",
-            "group2": "Licence revoked if severe. Considered after 6 months stability.",
-            "notifiable": "Yes (if symptomatic)."
         }
     },
     "Chapter 5: Drug & Alcohol": {
         "Alcohol Dependence": {
             "group1": "Revoked until 1 year of abstinence or controlled drinking.",
             "group2": "Revoked until 3 years of abstinence.",
-            "notifiable": "Yes."
-        },
-        "Cannabis/Cocaine Misuse": {
-            "group1": "Revoked for 6 months minimum (must be drug-free).",
-            "group2": "Revoked for 1 year minimum (must be drug-free).",
             "notifiable": "Yes."
         }
     },
@@ -106,11 +95,6 @@ DVLA_GUIDELINES = {
             "group1": "Must not drive and must notify. Relicensing if treated.",
             "group2": "Licence revoked. Requires specialist report and stability.",
             "notifiable": "Yes."
-        },
-        "Post-Major Surgery": {
-            "group1": "Follow clinical advice (1-3 months). No notification if <3 months.",
-            "group2": "Follow clinical advice. Occupational health review recommended.",
-            "notifiable": "No (if <3 months)."
         }
     }
 }
@@ -126,18 +110,34 @@ st.markdown("""
 
 # --- HEADER ---
 st.title("🩺 Complete DVLA Medical Standards (2026 Edition)")
-st.caption("A decision-support tool for doctors. Verified against latest GOV.UK Chapters.")
 
-# --- NAVIGATION ---
-col_chapter, col_condition = st.columns(2)
+# --- GLOBAL SEARCH FEATURE ---
+search_query = st.text_input("🔍 Quick Search (e.g. 'Syncope', 'Stroke', 'Acuity'):").strip().lower()
 
-with col_chapter:
-    selected_chapter = st.selectbox("📁 Select Chapter", options=list(DVLA_GUIDELINES.keys()))
-    # Added the "Source of Truth" link right under the selection
-    st.link_button(f"🔗 View Live {selected_chapter} on GOV.UK", CHAPTER_LINKS[selected_chapter])
-
-with col_condition:
-    selected_condition = st.selectbox("🔬 Select Condition", options=list(DVLA_GUIDELINES[selected_chapter].keys()))
+# Logic to handle Search vs. Selection
+if search_query:
+    results = []
+    for chap, conds in DVLA_GUIDELINES.items():
+        for cond_name, details in conds.items():
+            if search_query in cond_name.lower():
+                results.append((chap, cond_name, details))
+    
+    if results:
+        selected_chapter, selected_condition, res = results[0] # Pick the first match
+        st.success(f"Found: **{selected_condition}** in **{selected_chapter}**")
+    else:
+        st.error("Condition not found. Use the dropdowns below.")
+        selected_chapter = list(DVLA_GUIDELINES.keys())[0]
+        selected_condition = list(DVLA_GUIDELINES[selected_chapter].keys())[0]
+else:
+    # --- DROPDOWN NAVIGATION ---
+    col_chapter, col_condition = st.columns(2)
+    with col_chapter:
+        selected_chapter = st.selectbox("📁 Select Chapter", options=list(DVLA_GUIDELINES.keys()))
+        st.link_button(f"🔗 View Live {selected_chapter} on GOV.UK", CHAPTER_LINKS[selected_chapter])
+    with col_condition:
+        selected_condition = st.selectbox("🔬 Select Condition", options=list(DVLA_GUIDELINES[selected_chapter].keys()))
+    res = DVLA_GUIDELINES[selected_chapter][selected_condition]
 
 # --- CALCULATION (SIDEBAR) ---
 with st.sidebar:
@@ -151,35 +151,29 @@ with st.sidebar:
     st.divider()
     st.markdown("### 📞 DVLA Direct")
     st.write("Medical Enquiries: **0300 790 6806**")
-    st.caption("Mon-Fri, 10:30am - 1:00pm")
 
 # --- RESULTS DISPLAY ---
-if selected_chapter and selected_condition:
-    res = DVLA_GUIDELINES[selected_chapter][selected_condition]
-    
-    st.divider()
-    
-    # Notification Banner
-    notif_color = "#D32F2F" if "yes" in res['notifiable'].lower() else "#388E3C"
-    st.markdown(f"### Notification Status: <span style='color:{notif_color}'>{res['notifiable']}</span>", unsafe_allow_html=True)
+st.divider()
+notif_color = "#D32F2F" if "yes" in res['notifiable'].lower() else "#388E3C"
+st.markdown(f"### Notification Status: <span style='color:{notif_color}'>{res['notifiable']}</span>", unsafe_allow_html=True)
 
-    c1, c2 = st.columns(2)
-    with c1:
-        st.info(f"**🚗 Group 1 (Car/Motorcycle)**\n\n{res['group1']}")
-    with c2:
-        st.warning(f"**🚛 Group 2 (Bus/Lorry)**\n\n{res['group2']}")
+c1, c2 = st.columns(2)
+with c1:
+    st.info(f"**🚗 Group 1 (Car/Motorcycle)**\n\n{res['group1']}")
+with c2:
+    st.warning(f"**🚛 Group 2 (Bus/Lorry)**\n\n{res['group2']}")
 
-    # Clinical Note Generation
-    st.divider()
-    st.subheader("🖋️ Proposed Medical Entry / Discharge Advice")
-    note = (
-        f"DVLA FITNESS TO DRIVE: Discussed guidance for {selected_condition}. "
-        f"Based on {selected_chapter}, the patient is advised to cease driving for {cess_months} month(s) from the event date ({event_date.strftime('%d/%m/%Y')}). "
-        f"Earliest return date: {resume_date.strftime('%d/%m/%Y')}. "
-        f"Patient reminded of legal obligation to notify the DVLA."
-    )
-    st.code(note, language="text")
+# Clinical Note Generation
+st.divider()
+st.subheader("🖋️ Proposed Medical Entry / Discharge Advice")
+note = (
+    f"DVLA FITNESS TO DRIVE: Discussed guidance for {selected_condition}. "
+    f"Based on {selected_chapter}, the patient is advised to cease driving for {cess_months} month(s) from the event date ({event_date.strftime('%d/%m/%Y')}). "
+    f"Earliest return date: {resume_date.strftime('%d/%m/%Y')}. "
+    f"Patient reminded of legal obligation to notify the DVLA."
+)
+st.code(note, language="text")
 
 # --- FOOTER ---
 st.divider()
-st.caption("🚨 **Clinician Alert:** This tool is for guidance. Clinical judgment remains paramount. Verify high-stakes decisions with the linked GOV.UK source.")
+st.caption("🚨 **Clinician Alert:** This tool is for guidance. Clinical judgment remains paramount.")
