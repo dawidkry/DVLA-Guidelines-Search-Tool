@@ -20,3 +20,5 @@ Final Responsibility: The advising clinician is responsible for verifying the gu
 Group 2 Drivers: Exercise extreme caution with vocational licenses (HGV/Bus); standards are significantly more stringent.
 
 Notification: Patients must be reminded that it is their legal responsibility to notify the DVLA; the doctor's role is to advise and document.
+
+Copyright (c) 2026 dawidkry
