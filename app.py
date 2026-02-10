@@ -4,25 +4,36 @@ from datetime import datetime, timedelta, date
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="DVLA Clinical Standards 2026", page_icon="🩺", layout="wide")
 
-# --- STYLING (RESTORED TO YOUR PREFERRED THEME) ---
+# --- STYLING (FORCED WHITE TEXT ON SIDEBAR) ---
 st.markdown("""
     <style>
-    /* 1. Force Sidebar Background and Text Visibility */
+    /* 1. Sidebar Background */
     [data-testid="stSidebar"] {
         background-color: #f0f2f6 !important;
     }
+    
+    /* 2. FORCING SIDEBAR TEXT TO WHITE WITH TEXT-SHADOW FOR VISIBILITY */
     [data-testid="stSidebar"] * {
-        color: #000000 !important; /* Forces all text in sidebar to Black */
+        color: #FFFFFF !important;
+        text-shadow: 1px 1px 2px #000000, -1px -1px 2px #000000 !important;
     }
     
-    /* 2. Fix Metric Value specifically (The Resume Date) */
-    [data-testid="stMetricValue"] {
+    /* 3. Input fields must stay readable (Black text on White background) */
+    [data-testid="stSidebar"] input, [data-testid="stSidebar"] select {
         color: #000000 !important;
-        font-weight: bold !important;
-        font-size: 1.8rem !important;
+        text-shadow: none !important;
+        background-color: #FFFFFF !important;
     }
 
-    /* 3. Reference Box Styling */
+    /* 4. Fix Metric Value specifically (The Resume Date) */
+    [data-testid="stMetricValue"] {
+        color: #FFFFFF !important;
+        font-weight: bold !important;
+        font-size: 1.8rem !important;
+        text-shadow: 2px 2px 4px #000000 !important;
+    }
+
+    /* 5. Reference Box Styling (Main Page - stays black on white) */
     .ref-box {
         background-color: #ffffff;
         color: #1a1a1a;
@@ -123,7 +134,7 @@ st.link_button(f"🔗 Source: {chap} (GOV.UK)", DVLA_DATA[chap]["url"])
 # --- DATA RETRIEVAL ---
 res = DVLA_DATA[chap]["conditions"][cond]
 
-# --- SIDEBAR CALCULATOR ---
+# --- SIDEBAR CALCULATOR (WHITE TEXT ON GREY) ---
 with st.sidebar:
     st.header("⏳ Cessation Clock")
     evt_date = st.date_input("Date of Event:", value=date.today())
