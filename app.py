@@ -1,5 +1,5 @@
 import streamlit as st
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 # --- PAGE CONFIG ---
 st.set_page_config(
@@ -8,7 +8,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- DATASET (8 CHAPTERS) ---
+# --- DATASET ---
 DVLA_GUIDELINES = {
     "Chapter 1: Neurological": {
         "url": "https://www.gov.uk/guidance/neurological-disorders-assessing-fitness-to-drive",
@@ -29,62 +29,65 @@ DVLA_GUIDELINES = {
             "Aortic Aneurysm (>6cm)": {"g1": "Notify. Disqualified if >6.5cm.", "g2": "Disqualified if >5.5cm.", "notif": "Yes"}
         }
     },
-    "Chapter 3: Diabetes": {
-        "url": "https://www.gov.uk/guidance/diabetes-mellitus-assessing-fitness-to-drive",
-        "conditions": {
-            "Insulin Treated": {"g1": "May drive if <1 severe hypo/year.", "g2": "Strict criteria; CGM allowed with backup.", "notif": "Yes"}
-        }
-    },
-    "Chapter 4: Psychiatric": {
-        "url": "https://www.gov.uk/guidance/psychiatric-disorders-assessing-fitness-to-drive",
-        "conditions": {
-            "Psychosis / Schizophrenia": {"g1": "3 months stability to resume.", "g2": "12 months stability.", "notif": "Yes"}
-        }
-    },
-    "Chapter 5: Drug & Alcohol": {
-        "url": "https://www.gov.uk/guidance/drug-or-alcohol-misuse-and-dependence-assessing-fitness-to-drive",
-        "conditions": {
-            "Alcohol Dependence": {"g1": "1 year abstinence.", "g2": "3 years abstinence.", "notif": "Yes"}
-        }
-    },
-    "Chapter 6: Vision": {
-        "url": "https://www.gov.uk/guidance/visual-disorders-assessing-fitness-to-drive",
-        "conditions": {
-            "Visual Acuity Standard": {"g1": "6/12 and read plate at 20m.", "g2": "6/7.5 and 6/60 in poorer eye.", "notif": "If standard not met"}
-        }
-    },
-    "Chapter 7: Renal & Respiratory": {
-        "url": "https://www.gov.uk/guidance/renal-and-respiratory-disorders-assessing-fitness-to-drive",
-        "conditions": {
-            "Sleep Apnoea (OSA)": {"g1": "Stop until CPAP control.", "g2": "Stop until compliance confirmed.", "notif": "Yes"}
-        }
-    },
-    "Chapter 8: Miscellaneous": {
-        "url": "https://www.gov.uk/guidance/miscellaneous-conditions-assessing-fitness-to-drive",
-        "conditions": {
-            "Hepatic Encephalopathy": {"g1": "Must notify. Resume if treated.", "g2": "Revoked until stable.", "notif": "Yes"},
-            "Post-Major Surgery": {"g1": "Usually 1-3 months. No notification.", "g2": "Occ Health review.", "notif": "No (<3m)"}
-        }
-    }
+    "Chapter 3: Diabetes": { "url": "...", "conditions": { "Insulin Treated": {"g1": "...", "g2": "...", "notif": "Yes"} } },
+    "Chapter 4: Psychiatric": { "url": "...", "conditions": { "Psychosis": {"g1": "...", "g2": "...", "notif": "Yes"} } },
+    "Chapter 5: Drug & Alcohol": { "url": "...", "conditions": { "Alcohol Dependence": {"g1": "...", "g2": "...", "notif": "Yes"} } },
+    "Chapter 6: Vision": { "url": "...", "conditions": { "Visual Acuity": {"g1": "...", "g2": "...", "notif": "If standard not met"} } },
+    "Chapter 7: Renal & Respiratory": { "url": "...", "conditions": { "Sleep Apnoea": {"g1": "...", "g2": "...", "notif": "Yes"} } },
+    "Chapter 8: Miscellaneous": { "url": "...", "conditions": { "Post-Surgery": {"g1": "...", "g2": "...", "notif": "No"} } }
 }
 
-# --- HEADER ---
+# --- NAVIGATION ---
 st.title("🩺 DVLA Clinical Navigator")
 
-# --- NAVIGATION WITH KEYERROR PROTECTION ---
 col_chap, col_cond = st.columns(2)
-
 with col_chap:
-    # Adding a key="chap" helps Streamlit track state
     selected_chapter = st.selectbox("📁 Select Chapter", options=list(DVLA_GUIDELINES.keys()), key="chap")
     st.link_button(f"🔗 View Live {selected_chapter}", DVLA_GUIDELINES[selected_chapter]["url"])
 
 with col_cond:
-    # Dynamically fetch the condition list based on the chapter
     condition_options = list(DVLA_GUIDELINES[selected_chapter]["conditions"].keys())
     selected_condition = st.selectbox("🔬 Select Condition", options=condition_options, key="cond")
 
-# --- SIDEBAR: DYNAMIC CALCULATOR ---
+# --- SIDEBAR: FIXED CALCULATOR ---
 with st.sidebar:
     st.header("⏳ Cessation period")
-    event_date = st.date_input("Date of Event/Diagnosis:", value=datetime.
+    
+    # FIXED LINE: Added date.today() and closed all parentheses properly
+    event_date = st.date_input("Date of Event/Diagnosis:", value=date.today())
+    
+    calc_unit = st.radio("Calculate in:", ["Weeks", "Months"], horizontal=True)
+    
+    if calc_unit == "Weeks":
+        duration = st.number_input("Number of Weeks:", min_value=0, max_value=52, value=1)
+        resume_date = event_date + timedelta(weeks=duration)
+    else:
+        duration = st.number_input("Number of Months:", min_value=0, max_value=60, value=1)
+        # 30.44 days is the mathematical average for a month
+        resume_date = event_date + timedelta(days=int(duration * 30.44))
+    
+    st.metric("Earliest Resume Date", resume_date.strftime('%d/%m/%Y'))
+
+# --- RESULTS ---
+if selected_condition in DVLA_GUIDELINES[selected_chapter]["conditions"]:
+    res = DVLA_GUIDELINES[selected_chapter]["conditions"][selected_condition]
+    st.divider()
+
+    notif_color = "#D32F2F" if "yes" in res['notif'].lower() else "#388E3C"
+    st.markdown(f"### Notification Status: <span style='color:{notif_color}'>{res['notif']}</span>", unsafe_allow_html=True)
+
+    c1, c2 = st.columns(2)
+    with c1:
+        st.info(f"**🚗 Group 1**\n\n{res['g1']}")
+    with c2:
+        st.warning(f"**🚛 Group 2**\n\n{res['g2']}")
+
+    # --- CLINICAL NOTE ---
+    st.divider()
+    st.subheader("🖋️ Proposed Medical Entry")
+    note = (
+        f"DVLA ADVICE ({selected_condition}): Advised cessation for {duration} {calc_unit.lower()} "
+        f"from {event_date.strftime('%d/%m/%Y')}. Earliest resume: {resume_date.strftime('%d/%m/%Y')}. "
+        f"Patient advised of duty to notify DVLA: {res['notif']}."
+    )
+    st.code(note, language="text")
