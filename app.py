@@ -8,93 +8,98 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- DATABASE (Mock Data for Prototype) ---
-# In a full version, we could scrape the GOV.UK HTML, 
-# but for speed, we'll use a structured dictionary.
+# --- DATABASE ---
+# Expanded data set for clinical use
 DVLA_DATA = {
     "TIA / Stroke": {
-        "group1": "Must not drive for 1 month. May resume after 1 month if no residual deficit.",
-        "group2": "Licence refused or revoked for 1 year. Can be relicensed after 1 year if stable.",
-        "notifiable": "Only if multiple TIAs over short period or residual deficit after 1 month."
+        "group1": "Must not drive for 1 month. May resume after 1 month if no residual deficit. If multiple TIAs, seek specialist advice.",
+        "group2": "Licence refused or revoked for 1 year. Can be relicensed after 1 year if stable and imaging is clear.",
+        "notifiable": "No (unless residual deficit after 1 month)"
     },
     "Syncope (Simple Faint)": {
         "group1": "No restriction if there is an identifiable prodrome and no recurrence.",
-        "group2": "No restriction unless recurring or no prodrome.",
-        "notifiable": "No."
+        "group2": "No restriction unless recurring, no prodrome, or occurs while sitting/standing.",
+        "notifiable": "No"
     },
     "Epilepsy (First Seizure)": {
-        "group1": "Must not drive for 6 months or 12 months depending on risk factors.",
+        "group1": "Must not drive for 6 months (or 12 months if high risk). Specialist review required.",
         "group2": "Must not drive for 5 years. Must be seizure-free without medication for 10 years.",
-        "notifiable": "Yes."
+        "notifiable": "Yes"
     },
     "Myocardial Infarction (STEMI/NSTEMI)": {
-        "group1": "Must not drive for 1 week if successfully treated with primary PCI.",
-        "group2": "Must not drive for at least 6 weeks. Requires LVEF > 40%.",
-        "notifiable": "No (for Group 1)."
+        "group1": "Must not drive for 1 week if successfully treated with primary PCI and LVEF > 40%. Otherwise 4 weeks.",
+        "group2": "Must not drive for at least 6 weeks. Requires exercise test and LVEF > 40%.",
+        "notifiable": "No (for Group 1)"
+    },
+    "Hypoglycaemia (Severe)": {
+        "group1": "Must not drive if more than one episode of severe hypoglycemia in 12 months.",
+        "group2": "Must not drive. Very strict criteria for relicensing.",
+        "notifiable": "Yes"
     }
 }
 
-# --- STYLING ---
+# --- STYLING (The fix is here: unsafe_allow_html) ---
 st.markdown("""
     <style>
     .main { background-color: #f8f9fa; }
     .stAlert { border-radius: 10px; }
+    h1 { color: #004b87; } /* NHS Blue-ish */
     </style>
-    """, unsafe_allow_info=True)
+    """, unsafe_allow_html=True)
 
 # --- HEADER ---
 st.title("🩺 DVLA Medical Standards Quick-Reference")
-st.caption("A clinician-focused tool for rapid fitness-to-drive assessment during discharge or clinic.")
+st.caption(f"Logged in as: Clinician | Date: {datetime.now().strftime('%d/%m/%Y')}")
 
-# --- SIDEBAR (Calculator & Info) ---
+# --- SIDEBAR: Date Calculator ---
 with st.sidebar:
     st.header("📅 Return to Drive Calc")
     event_date = st.date_input("Date of clinical event:", value=datetime.now())
     months_off = st.number_input("Months recommended off:", min_value=0, max_value=24, value=1)
     
     # Calculate return date
-    # Note: Using 30 days per month for clinical estimation
     return_date = event_date + timedelta(days=(months_off * 30))
     st.success(f"Earliest return date:\n\n**{return_date.strftime('%d %B %Y')}**")
     
     st.divider()
-    st.info("📞 **DVLA Medical Advisory**\n\n01792 782337\n(Mon-Fri, 10:30am - 1:00pm)")
+    st.markdown("""
+    **GMC Duty of Care:**
+    Doctors should advise patients of their legal requirement to notify the DVLA. If a patient continues to drive against advice, you may have a duty to disclose this to the DVLA medical adviser.
+    """)
 
 # --- MAIN SEARCH UI ---
-search_query = st.selectbox(
-    "Search Medical Condition:",
-    options=["Select a condition..."] + list(DVLA_DATA.keys())
-)
+# Search bar with a placeholder
+search_input = st.text_input("Search condition (e.g. Stroke, MI, Faint):", "").strip().lower()
 
-if search_query != "Select a condition...":
-    data = DVLA_DATA[search_query]
-    
-    # Notification Status Row
-    notif_color = "red" if data['notifiable'].lower() == "yes" else "green"
-    st.markdown(f"### **Notifiable to DVLA?** <span style='color:{notif_color}'>{data['notifiable']}</span>", unsafe_allow_html=True)
-    
-    # Comparison Columns
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("🚗 Group 1")
-        st.caption("Cars and Motorcycles")
-        st.info(data['group1'])
-        
-    with col2:
-        st.subheader("🚛 Group 2")
-        st.caption("Lorries and Buses")
-        st.warning(data['group2'])
-        
-    # Discharge Summary Snippet
-    st.divider()
-    st.subheader("📝 Discharge Summary Text (Copy/Paste)")
-    snippet = f"Following your {search_query}, you have been advised that you must not drive for {months_off} month(s). Based on current DVLA guidance, your earliest date to resume driving is {return_date.strftime('%d/%m/%Y')}. It is your legal responsibility to notify the DVLA if required."
-    st.text_area("Patient Advice:", value=snippet, height=100)
+# Filter logic
+results = {k: v for k, v in DVLA_DATA.items() if search_input in k.lower()}
 
+if search_input and results:
+    for condition, data in results.items():
+        st.subheader(f"Condition: {condition}")
+        
+        # Notification Status
+        notif_status = data['notifiable']
+        color = "red" if "yes" in notif_status.lower() else "orange" if "specialist" in notif_status.lower() else "green"
+        st.markdown(f"**Notifiable?** :{color}[{notif_status}]")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.info(f"**🚗 Group 1 (Car/Bike)**\n\n{data['group1']}")
+        with col2:
+            st.warning(f"**🚛 Group 2 (Bus/Lorry)**\n\n{data['group2']}")
+            
+        # Discharge Summary Snippet
+        st.markdown("#### 📝 Discharge Summary Text")
+        snippet = f"Patient advised regarding DVLA fitness to drive standards for {condition}. Recommended driving cessation for {months_off} month(s) from date of event ({event_date.strftime('%d/%m/%Y')}). Earliest return date: {return_date.strftime('%d/%m/%Y')}. Responsibility for notification rests with the patient."
+        st.code(snippet, language="text")
+        st.divider()
+
+elif search_input:
+    st.error("Condition not found. Please check spelling or consult the full DVLA 'At a Glance' guide.")
 else:
-    st.write("Please select a condition from the dropdown above to see the specific DVLA requirements.")
+    st.info("Start typing a condition above to see the requirements.")
 
-# --- FOOTER / DISCLAIMER ---
+# --- FOOTER ---
 st.divider()
-st.caption("⚠️ **Disclaimer:** This tool is for educational purposes only and should be cross-referenced with the latest version of 'Assessing fitness to drive: a guide for medical professionals' on GOV.UK. Clinical judgment remains paramount.")
+st.caption("⚠️ **Disclaimer:** This tool is a clinical aid and does not replace the official 'Assessing fitness to drive' guidance. Ensure you verify with the latest GOV.UK updates as regulations change.")
