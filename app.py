@@ -14,9 +14,8 @@ st.markdown("""
     
     .dash-box { background-color: #000000; color: #ffffff; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
     .ref-box { background-color: #f1f3f5; color: #1a1a1a; padding: 20px; border-left: 8px solid #005eb8; border-radius: 4px; font-size: 1.1em; }
-    .appendix-d-box { background-color: #ffffff; border: 2px solid #005eb8; padding: 25px; border-radius: 10px; margin-top: 20px; color: #000000; }
+    .appendix-header { color: #005eb8; font-weight: bold; margin-top: 20px; border-bottom: 2px solid #005eb8; padding-bottom: 5px; }
     .disclaimer-banner { background-color: #440000; color: #FFCCCC; padding: 15px; border-radius: 5px; border: 2px solid #FF0000; text-align: center; margin-top: 20px; }
-    h2, h3 { color: #005eb8; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -144,109 +143,105 @@ st.divider()
 st.subheader("🖋️ Proposed Medical Entry")
 st.code(f"DVLA FITNESS TO DRIVE ASSESSMENT:\nClinical Context: {cond}\nRegulatory Guidance: {res['ref']}\nAdvice: Cease driving for {num} {unit.lower()} from {evt_date.strftime('%d/%m/%Y')}.\nEarliest Potential Resume: {res_date.strftime('%d/%m/%Y')}\nDVLA Notification Required: {res['notif']}.", language="text")
 
-# --- EXACT APPENDIX D SECTION ---
-st.markdown('<div class="appendix-d-box">', unsafe_allow_html=True)
-st.markdown("""
-## Appendix D: Transient loss of consciousness (blackouts) and lost or altered awareness
-**Including blackout with seizure markers and cough syncope**
+# --- COLLAPSIBLE APPENDIX D SECTION ---
+st.markdown('<h2 class="appendix-header">Appendix D Decision Support Matrix</h2>', unsafe_allow_html=True)
 
-**Driving standards for non-traumatic transient loss of consciousness.**
-Transient loss of consciousness (TLoC) or ‘blackout’ unrelated to trauma is very common and affects up to half the population in the UK at some point in their lives.
+with st.expander("📖 1. Overview: TLoC and Altered Awareness"):
+    st.markdown("""
+    **Driving standards for non-traumatic transient loss of consciousness.**
+    Transient loss of consciousness (TLoC) or ‘blackout’ unrelated to trauma is very common and affects up to half the population in the UK at some point in their lives.
 
-TLoC is a state of real or apparent loss if consciousness which is associated with loss of awareness, amnesia for the period of unconsciousness, abnormal motor control, and loss of responsiveness. The condition is of short duration.
+    TLoC is a state of real or apparent loss if consciousness which is associated with loss of awareness, amnesia for the period of unconsciousness, abnormal motor control, and loss of responsiveness. The condition is of short duration.
 
-Following an episode of transient loss of consciousness, Group 1 and Group 2 drivers should be assessed as soon as possible by a healthcare professional to advise regarding driving implications as set out in this guidance.
+    Following an episode of transient loss of consciousness, Group 1 and Group 2 drivers should be assessed as soon as possible by a healthcare professional to advise regarding driving implications as set out in this guidance.
 
-If a healthcare professional can attribute a diagnosis to the episode(s) of TLoC then the relevant medical standard for that diagnosis will be applied from the appropriate section of this guide (neurological disorders, cardiovascular disorders or diabetes mellitus).
+    If a healthcare professional can attribute a diagnosis to the episode(s) of TLoC then the relevant medical standard for that diagnosis will be applied from the appropriate section of this guide (neurological disorders, cardiovascular disorders or diabetes mellitus).
 
-If a diagnosis cannot be attributed, or until a diagnosis is established, the standard for “unexplained loss of consciousness” will apply.
+    If a diagnosis cannot be attributed, or until a diagnosis is established, the standard for “unexplained loss of consciousness” will apply.
 
-**Causes of transient loss of consciousness relevant to driving include:**
-* **syncope** - see relevant section of this guidance
-* **epilepsy and seizures** - see relevant section of the Neurological disorders guidance
-* **hypoglycaemia** - see relevant section of the Diabetes mellitus guidance
-* **unexplained** - see relevant section of this guidance
+    **Causes of transient loss of consciousness relevant to driving include:**
+    * **syncope** - see relevant section of this guidance
+    * **epilepsy and seizures** - see relevant section of the Neurological disorders guidance
+    * **hypoglycaemia** - see relevant section of the Diabetes mellitus guidance
+    * **unexplained** - see relevant section of this guidance
 
-Other diagnosed causes of loss of consciousness will only require notification to DVLA and subsequent enquiry if medical opinion considers that they are relevant to driving. This will include episodes clinically attributed to Postural Orthostatic Tachycardia Syndrome (POTS) and orthostatic hypotension.
+    Other diagnosed causes of loss of consciousness will only require notification to DVLA and subsequent enquiry if medical opinion considers that they are relevant to driving. This will include episodes clinically attributed to Postural Orthostatic Tachycardia Syndrome (POTS) and orthostatic hypotension.
+    """)
 
-### Syncope
-Syncope is defined as transient loss of consciousness due to cerebral hypoperfusion, characterised by a rapid onset, short duration, and spontaneous complete recovery.
+with st.expander("🫀 2. Syncope and Reflex Syncope Definitions"):
+    st.markdown("""
+    ### Syncope
+    Syncope is defined as transient loss of consciousness due to cerebral hypoperfusion, characterised by a rapid onset, short duration, and spontaneous complete recovery.
 
-The term presyncope describes symptoms and signs of cerebral hypoperfusion that occur before complete loss of consciousness. For licensing decisions, an episode of presyncope without progression to TLoC is relevant if medical opinion considers that the presyncope has caused an individual to be unable to safely control or stop a vehicle. In such cases, the standards for syncope will apply.
+    The term presyncope describes symptoms and signs of cerebral hypoperfusion that occur before complete loss of consciousness. For licensing decisions, an episode of presyncope without progression to TLoC is relevant if medical opinion considers that the presyncope has caused an individual to be unable to safely control or stop a vehicle. In such cases, the standards for syncope will apply.
 
-**Causes of syncope relevant to driving include:**
-* reflex syncope (vasovagal/neurocardiogenic syncope and situational syncope)
-* cardiac causes of syncope including arrhythmia and structural heart disease (including valve disease, pulmonary arterial hypertension, cardiomyopathy, and Brugada Syndrome)
+    **Causes of syncope relevant to driving include:**
+    * reflex syncope (vasovagal/neurocardiogenic syncope and situational syncope)
+    * cardiac causes of syncope including arrhythmia and structural heart disease (including valve disease, pulmonary arterial hypertension, cardiomyopathy, and Brugada Syndrome)
 
-### Reflex syncope
-The application of medical standards for reflex syncope requires a positive diagnosis based on clinical assessment and investigations. The diagnosis of reflex syncope is made on the balance of probability and if a clinician cannot attribute a cause of syncope, the standard for unexplained transient loss of consciousness will apply.
+    ### Reflex syncope
+    The application of medical standards for reflex syncope requires a positive diagnosis based on clinical assessment and investigations. The diagnosis of reflex syncope is made on the balance of probability and if a clinician cannot attribute a cause of syncope, the standard for unexplained transient loss of consciousness will apply.
 
-Reflex syncope can be associated with either or both:
-* **prodrome**, such as sweating or feeling warm/hot before loss of consciousness
-* **provocation**, such as pain, emotional stress or a medical procedure
+    Reflex syncope can be associated with either or both:
+    * **prodrome**, such as sweating or feeling warm/hot before loss of consciousness
+    * **provocation**, such as pain, emotional stress or a medical procedure
 
-Some episodes of reflex syncope are related to micturition, defecation, or swallowing (‘situational’ syncope).
+    Some episodes of reflex syncope are related to micturition, defecation, or swallowing (‘situational’ syncope).
 
-A **‘reliable prodrome’** occurs predictably before syncope, is recognised by the driver as a warning of impending loss of consciousness and should be of sufficient duration to allow the driver to safely stop the vehicle.
+    A **‘reliable prodrome’** occurs predictably before syncope, is recognised by the driver as a warning of impending loss of consciousness and should be of sufficient duration to allow the driver to safely stop the vehicle.
 
-An **‘avoidable provocation’** includes factors that may provoke syncope, but which can be avoided and are not expected to occur while driving, such as exposure to a medical procedure, or syncope after a prolonged period of standing (for example, soldier on parade).
+    An **‘avoidable provocation’** includes factors that may provoke syncope, but which can be avoided and are not expected to occur while driving, such as exposure to a medical procedure, or syncope after a prolonged period of standing (for example, soldier on parade).
+    """)
 
----
+with st.expander("🚗 3. Reflex Syncope Standards (With & Without Prodrome)"):
+    st.markdown("""
+    #### Reflex syncope (vasovagal) with a reliable prodrome
+    | Condition | Group 1 (Car/Motorcycle) | Group 2 (Bus/Lorry) |
+    | :--- | :--- | :--- |
+    | **Single episode** | **✓** If syncope has not occurred while driving, may drive and need not notify DVLA.<br>**✘** If syncope has occurred while driving, then must not drive and need not notify DVLA. Driving may resume one month following the episode of syncope. | **!** Must notify DVLA. Should a further episode occur within 24 months the guidance for multiple episodes will apply.<br>**✓** If syncope was associated with an avoidable provocation and did not occur while driving, may resume driving after recovery.<br>**✘** If syncope was not associated with an avoidable provocation, or syncope occurred while driving, must not drive. Driving may resume 3 months following subject to report.*** |
+    | **Multiple episodes** (2+ in 24m) | **✓** If syncope has not occurred while driving, may drive and need not notify DVLA.<br>**✘** If syncope has occurred while driving, must not drive and must notify DVLA. Driving may resume 3 months following most recent episode. | **✘** Must notify DVLA and must not drive.<br>**✓** If syncope is associated with an avoidable provocation and has not occurred while driving, may resume driving after recovery.<br>**✘** If syncope is not associated with an avoidable provocation or has occurred while driving, must not drive. Driving may resume 6 months following subject to report.*** |
 
-#### Reflex syncope (often referred to as vasovagal syncope) with a reliable prodrome
-| Condition | Group 1 (Car/Motorcycle) | Group 2 (Bus/Lorry) |
-| :--- | :--- | :--- |
-| **Single episode** | **✓** If syncope has not occurred while driving, may drive and need not notify DVLA.<br>**✘** If syncope has occurred while driving, then must not drive and need not notify DVLA. Driving may resume one month following the episode of syncope. | **!** Must notify DVLA. Should a further episode occur within 24 months the guidance for multiple episodes will apply.<br>**✓** If syncope was associated with an avoidable provocation and did not occur while driving, may resume driving after recovery from the episode of syncope.<br>**✘** If syncope was not associated with an avoidable provocation, or syncope occurred while driving, must not drive. Driving may resume 3 months following the syncopal episode subject to an appropriate specialist report.*** |
-| **Multiple episodes** (2+ in 24m) | **✓** If syncope has not occurred while driving, may drive and need not notify DVLA.<br>**✘** If syncope has occurred while driving, must not drive and must notify DVLA. Driving may resume 3 months following the most recent episode. | **✘** Must notify DVLA and must not drive.<br>**✓** If syncope is associated with an avoidable provocation and has not occurred while driving, may resume driving after recovery.<br>**✘** If syncope is not associated with an avoidable provocation or has occurred while driving, must not drive. Driving may resume 6 months following the most recent episode subject to a specialist report.*** |
-
----
-
-#### Reflex syncope without a reliable prodrome
-| Condition | Group 1 (Car/Motorcycle) | Group 2 (Bus/Lorry) |
-| :--- | :--- | :--- |
-| **Single episode** | **✘** Must not drive and must notify DVLA.<br>**✓** If syncope was associated with avoidable provocation and did not occur while driving, resume after recovery.<br>**✘** If not associated with avoidable provocation or occurred while driving, resume after 3 months. | **✘** Must not drive and must notify DVLA.<br>**!** If syncope associated with avoidable provocation and did not occur while driving, resume after 3 months subject to specialist report.***<br>**!** If not associated with avoidable provocation or occurred while driving, resume after 12 months subject to specialist report.*** |
-| **Multiple episodes*** | **✘** Must not drive and must notify DVLA.<br>**✓** If associated with avoidable provocation and not while driving, resume after 3 months.<br>**✘** If not associated with avoidable provocation or occurred while driving, resume after 6 months. | **✘** Must not drive and must notify DVLA.<br>**!** Relicensing may be considered 12 months following most recent episode, subject to specialist report.*** |
-*\*this standard should apply when any of the multiple episodes occurs without a reliable prodrome.*
-
----
-
-#### Unexplained loss of consciousness (without seizure markers)
-| Condition | Group 1 (Car/Motorcycle) | Group 2 (Bus/Lorry) |
-| :--- | :--- | :--- |
-| **Single episode** | **✘** Must notify DVLA. Resume 6 months after the episode. | **✘** Must notify DVLA. Licence revoked for 12 months. |
-| **Multiple episodes**** | **✘** Must notify DVLA. Licence revoked for 12 months after most recent episode. | **✘** Must notify DVLA. Licence revoked for 5 years after most recent episode. |
-*\*\*for multiple episodes of mixed presentation/aetiology the relevant standard applies to each episode.*
-
----
-
-**Note:**
-***An **“appropriate specialist”** is a clinician whose work regularly results in exposure to this medical condition (e.g., Neurology, Cardiology, Syncope clinics).
-The content of a specialist report should include:
-* level of confidence in reflex syncope diagnosis
-* confirmation if syncope occurred whilst driving
-* presence/absence of reliable prodrome
-* discussion of provocation
-* risk opinion (balance of probability) regarding the 20% (G1) and 2% (G2) annual thresholds.
-
-### Blackouts with seizure markers
-Clinical suspicion of a seizure but no definite evidence. Individuals require assessment and investigation (EEG/Brain Scan).
-**Likely seizure factors:** LOC > 5m, Amnesia > 5m, Injury, Tongue biting, Incontinence, Post-ictal confusion, Headache.
-
-| Condition | Group 1 (Car/Motorcycle) | Group 2 (Bus/Lorry) |
-| :--- | :--- | :--- |
-| **Isolated episode** | **✘** Stop driving/Notify. 6 months off. (12 months if high risk). | **✘** Stop driving/Notify. 5 years off. |
-| **Recurrent episodes** | **✘** Standards for isolated seizure or epilepsy apply. | **✘** Standards for isolated seizure or epilepsy apply. |
-
-### Cough syncope
-Cough syncope identification places the person in a higher risk group. Treatment of the underlying cause (e.g., respiratory infection) **does not** reduce the risk of further episodes.
-
-| Condition | Group 1 (Car/Motorcycle) | Group 2 (Bus/Lorry) |
-| :--- | :--- | :--- |
-| **Cough Syncope** | **✘** Must notify. 6 months off for single; 12 months off for multiple (over 5 years). | **✘** Must notify. 12 months off for single; 5 years off for multiple (over 5 years). |
-*If more than one episode occurs within 24 hours, it counts as a single event. Episodes >24 hours apart are multiple.*
-""")
-st.markdown('</div>', unsafe_allow_html=True)
+    #### Reflex syncope without a reliable prodrome
+    | Condition | Group 1 (Car/Motorcycle) | Group 2 (Bus/Lorry) |
+    | :--- | : :--- | :--- |
+    | **Single episode** | **✘** Must not drive and must notify DVLA.<br>**✓** If syncope was associated with avoidable provocation and did not occur while driving, resume after recovery.<br>**✘** If not associated with avoidable provocation or occurred while driving, resume after 3 months. | **✘** Must not drive and must notify DVLA.<br>**!** If associated with avoidable provocation and did not occur while driving, resume after 3 months subject to report.***<br>**!** If not associated with avoidable provocation or occurred while driving, resume after 12 months subject to report.*** |
+    | **Multiple episodes*** | **✘** Must not drive and must notify DVLA.<br>**✓** If associated with avoidable provocation and not while driving, resume after 3 months.<br>**✘** If not associated with avoidable provocation or occurred while driving, resume after 6 months. | **✘** Must not drive and must notify DVLA.<br>**!** Relicensing may be considered 12 months following subject to report.*** |
+    """)
 
 
+
+with st.expander("❓ 4. Unexplained Loss of Consciousness"):
+    st.markdown("""
+    #### Unexplained loss of consciousness (without seizure markers)
+    | Condition | Group 1 (Car/Motorcycle) | Group 2 (Bus/Lorry) |
+    | :--- | :--- | :--- |
+    | **Single episode** | **✘** Must notify DVLA. Resume 6 months after the episode. | **✘** Must notify DVLA. Licence revoked for 12 months. |
+    | **Multiple episodes**** | **✘** Must notify DVLA. Licence revoked for 12 months after most recent episode. | **✘** Must notify DVLA. Licence revoked for 5 years after most recent episode. |
+    
+    **Note:**
+    ***An **“appropriate specialist”** includes clinicians who undertake independent decision making in neurology, cardiology, or syncope clinics.
+    The report must include confidence in diagnosis, driving history, prodrome/provocation details, and risk opinion against the 20%/2% annual thresholds.
+    """)
+
+with st.expander("🧠 5. Blackouts with Seizure Markers"):
+    st.markdown("""
+    Clinical suspicion of a seizure but no definite evidence. Requires specialist assessment and investigation (EEG/Brain Scan).
+    **Likely seizure factors:** LOC > 5m, Amnesia > 5m, Injury, Tongue biting, Incontinence, Post-ictal confusion, Headache.
+
+    | Condition | Group 1 (Car/Motorcycle) | Group 2 (Bus/Lorry) |
+    | :--- | :--- | :--- |
+    | **Isolated episode** | **✘** Stop driving/Notify. 6 months off. (12 months if high risk). | **✘** Stop driving/Notify. 5 years off. |
+    | **Recurrent episodes** | **✘** Standards for isolated seizure or epilepsy apply. | **✘** Standards for isolated seizure or epilepsy apply. |
+    """)
+
+with st.expander("💨 6. Cough Syncope Standards"):
+    st.markdown("""
+    Cough syncope identification places the person in a higher risk group. Treatment of the underlying cause **does not** reduce the risk of further episodes.
+
+    | Condition | Group 1 (Car/Motorcycle) | Group 2 (Bus/Lorry) |
+    | :--- | :--- | :--- |
+    | **Cough Syncope** | **✘** Must notify. 6 months off for single; 12 months off for multiple (over 5 years). | **✘** Must notify. 12 months off for single; 5 years off for multiple (over 5 years). |
+    *If more than one episode occurs within 24 hours, it counts as a single event. Episodes >24 hours apart are multiple.*
+    """)
 
 st.markdown('<div class="disclaimer-banner"><strong>⚠️ DISCLAIMER:</strong> Decision-support only. Always verify at GOV.UK.</div>', unsafe_allow_html=True)
