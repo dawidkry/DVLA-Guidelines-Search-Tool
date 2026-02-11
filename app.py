@@ -144,7 +144,7 @@ st.subheader("🖋️ Proposed Medical Entry")
 st.code(f"DVLA FITNESS TO DRIVE ASSESSMENT:\nClinical Context: {cond}\nRegulatory Guidance: {res['ref']}\nAdvice: Cease driving for {num} {unit.lower()} from {evt_date.strftime('%d/%m/%Y')}.\nEarliest Potential Resume: {res_date.strftime('%d/%m/%Y')}\nDVLA Notification Required: {res['notif']}.", language="text")
 
 # --- COLLAPSIBLE APPENDIX D SECTION ---
-st.markdown('<h2 class="appendix-header">Appendix D Decision Support Matrix</h2>', unsafe_allow_html=True)
+st.markdown('<h2 class="appendix-header">Appendix D</h2>', unsafe_allow_html=True)
 
 with st.expander("📖 1. Overview: TLoC and Altered Awareness"):
     st.markdown("""
