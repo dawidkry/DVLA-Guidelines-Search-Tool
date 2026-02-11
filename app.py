@@ -146,7 +146,7 @@ st.code(f"DVLA FITNESS TO DRIVE ASSESSMENT:\nClinical Context: {cond}\nRegulator
 # --- COLLAPSIBLE APPENDIX D SECTION ---
 st.markdown('<h2 class="appendix-header">Appendix D</h2>', unsafe_allow_html=True)
 
-with st.expander("📖 1. Overview: TLoC and Altered Awareness"):
+with st.expander(" 1. Overview: TLoC and Altered Awareness"):
     st.markdown("""
     **Driving standards for non-traumatic transient loss of consciousness.**
     Transient loss of consciousness (TLoC) or ‘blackout’ unrelated to trauma is very common and affects up to half the population in the UK at some point in their lives.
@@ -168,7 +168,7 @@ with st.expander("📖 1. Overview: TLoC and Altered Awareness"):
     Other diagnosed causes of loss of consciousness will only require notification to DVLA and subsequent enquiry if medical opinion considers that they are relevant to driving. This will include episodes clinically attributed to Postural Orthostatic Tachycardia Syndrome (POTS) and orthostatic hypotension.
     """)
 
-with st.expander("🫀 2. Syncope and Reflex Syncope Definitions"):
+with st.expander(" 2. Syncope and Reflex Syncope Definitions"):
     st.markdown("""
     ### Syncope
     Syncope is defined as transient loss of consciousness due to cerebral hypoperfusion, characterised by a rapid onset, short duration, and spontaneous complete recovery.
@@ -193,7 +193,7 @@ with st.expander("🫀 2. Syncope and Reflex Syncope Definitions"):
     An **‘avoidable provocation’** includes factors that may provoke syncope, but which can be avoided and are not expected to occur while driving, such as exposure to a medical procedure, or syncope after a prolonged period of standing (for example, soldier on parade).
     """)
 
-with st.expander("🚗 3. Reflex Syncope Standards (With & Without Prodrome)"):
+with st.expander(" 3. Reflex Syncope Standards (With & Without Prodrome)"):
     st.markdown("""
     #### Reflex syncope (vasovagal) with a reliable prodrome
     | Condition | Group 1 (Car/Motorcycle) | Group 2 (Bus/Lorry) |
@@ -210,7 +210,7 @@ with st.expander("🚗 3. Reflex Syncope Standards (With & Without Prodrome)"):
 
 
 
-with st.expander("❓ 4. Unexplained Loss of Consciousness"):
+with st.expander(" 4. Unexplained Loss of Consciousness"):
     st.markdown("""
     #### Unexplained loss of consciousness (without seizure markers)
     | Condition | Group 1 (Car/Motorcycle) | Group 2 (Bus/Lorry) |
@@ -223,7 +223,7 @@ with st.expander("❓ 4. Unexplained Loss of Consciousness"):
     The report must include confidence in diagnosis, driving history, prodrome/provocation details, and risk opinion against the 20%/2% annual thresholds.
     """)
 
-with st.expander("🧠 5. Blackouts with Seizure Markers"):
+with st.expander(" 5. Blackouts with Seizure Markers"):
     st.markdown("""
     Clinical suspicion of a seizure but no definite evidence. Requires specialist assessment and investigation (EEG/Brain Scan).
     **Likely seizure factors:** LOC > 5m, Amnesia > 5m, Injury, Tongue biting, Incontinence, Post-ictal confusion, Headache.
@@ -234,7 +234,7 @@ with st.expander("🧠 5. Blackouts with Seizure Markers"):
     | **Recurrent episodes** | **✘** Standards for isolated seizure or epilepsy apply. | **✘** Standards for isolated seizure or epilepsy apply. |
     """)
 
-with st.expander("💨 6. Cough Syncope Standards"):
+with st.expander(" 6. Cough Syncope Standards"):
     st.markdown("""
     Cough syncope identification places the person in a higher risk group. Treatment of the underlying cause **does not** reduce the risk of further episodes.
 
